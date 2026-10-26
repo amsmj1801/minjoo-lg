@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e0f0d">
+<title>Club X — App Prototype</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<aside id="panel" aria-label="Flows">
+  <header>
+    <a class="brand" href="../">Club<span>X</span></a>
+    <p class="sub">App prototype · from Figma “Design”</p>
+  </header>
+  <div class="controls">
+    <button id="btn-back" type="button" title="Back (←)">← Back</button>
+    <button id="btn-restart" type="button" title="Restart (R)">Restart</button>
+    <label class="toggle"><input id="chk-hints" type="checkbox"> Show tap areas</label>
+  </div>
+  <nav id="flows"></nav>
+  <footer>
+    <div id="where"></div>
+    <p class="tip">Tap anywhere that isn’t a link to flash the tap areas.</p>
+  </footer>
+</aside>
+
+<main id="stage">
+  <button id="menu" type="button" aria-label="Open flow menu">☰</button>
+  <div id="device">
+    <div id="viewport"></div>
+  </div>
+</main>
+
+<script src="flow.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
