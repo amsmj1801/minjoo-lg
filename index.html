@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CLUB X — Presentation Prototype</title>
+<style>
+  :root { --bg: #000; --accent: #8be04e; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: var(--bg); overflow: hidden; }
+  body { display: grid; place-items: center; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
+
+  /* 16:9 stage that fits the viewport */
+  #stage { position: relative; width: min(100vw, calc(100vh * 16 / 9)); aspect-ratio: 16 / 9; overflow: hidden; cursor: pointer; }
+  .slide { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 0; transition-property: opacity; transition-timing-function: cubic-bezier(.2,.8,.2,1); pointer-events: none; }
+  .slide.on { opacity: 1; }
+
+  /* Interactive phone mockups (slide 06) — positions are % of the 1920×1080 frame */
+  .phone { position: absolute; display: none; }
+  .phone img { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity .15s ease; }
+  .phone img.on { opacity: 1; }
+  #stage[data-id="2244:14408"] .phone { display: block; }
+
+  /* Progress bar + hint */
+  #bar { position: fixed; left: 0; bottom: 0; height: 3px; background: var(--accent); transition: width .3s ease; z-index: 5; }
+  #hint { position: fixed; right: 16px; bottom: 12px; color: #fff; font-size: 12px; opacity: .55; background: rgba(0,0,0,.45); padding: 6px 10px; border-radius: 999px; transition: opacity .6s; z-index: 5; pointer-events: none; }
+  #hint.hide { opacity: 0; }
+</style>
+</head>
+<body>
+<div id="stage" aria-live="polite"></div>
+<div id="bar"></div>
+<div id="hint">Click / → / Enter to advance · ← back · F fullscreen</div>
+
+<script>
+// Slide flow exported from Figma page "발표자료" (start: 01_Before).
+// next: destination, dur: transition seconds, auto: seconds before auto-advance.
+const SLIDES = [
+  { id: "2209:17565", name: "01_Before",   dur: 0.5 },
+  { id: "2237:13947", name: "01_After",    dur: 1.0 },
+  { id: "2244:26637", name: "01-1_Before", dur: 0.65 },
+  { id: "2244:26740", name: "01-1_After",  dur: 1.1, auto: 0.25 },
+  { id: "2244:26843", name: "01-1_Final",  dur: 1.0 },
+  { id: "2209:17713", name: "02_Before",   dur: 0.65 },
+  { id: "2209:17806", name: "02_After",    dur: 1.1, auto: 0.25 },
+  { id: "2209:17899", name: "02_Final",    dur: 0.5 },
+  { id: "2209:17992", name: "03_Before",   dur: 0.65 },
+  { id: "2209:18079", name: "03_After",    dur: 1.1, auto: 0.25 },
+  { id: "2209:18165", name: "03_Final",    dur: 0.5 },
+  { id: "2209:18251", name: "04_Before",   dur: 0.65 },
+  { id: "2209:18262", name: "04_After",    dur: 1.1, auto: 0.25 },
+  { id: "2209:18273", name: "04_Final",    dur: 0.5 },
+  { id: "2209:18284", name: "05_Before",   dur: 0.65 },
+  { id: "2209:18292", name: "05_After",    dur: 0.5 },
+  { id: "2209:18300", name: "06_Before",   dur: 0.8 },
+  { id: "2244:14408", name: "06_After",    dur: 0.5 },
+  { id: "2209:18330", name: "07_Before",   dur: 0.65 },
+  { id: "2209:18430", name: "07_After",    dur: 0.5 },
+  { id: "2244:14370", name: "08_Before",   dur: 0.65 },
+  { id: "2209:18530", name: "08_Before",   dur: 0.65 },
+  { id: "2209:18630", name: "08_After",    dur: 0.5 },
+  { id: "2209:18730", name: "09_Before",   dur: 0.65 },
+  { id: "2209:18764", name: "09_After",    dur: 1.1, auto: 0.25 },
+  { id: "2209:18798", name: "09_Final",    dur: 0.5 },
+  { id: "2209:18832", name: "10_Before",   dur: 0.65 },
+  { id: "2209:18866", name: "10_After",    dur: 1.0 },
+  { id: "2237:14189", name: "10_Before",   dur: 0.65 },
+  { id: "2237:14223", name: "10_After",    dur: 0.5 },
+  { id: "2209:18900", name: "11_Before",   dur: 1.0 },
+  { id: "2209:19005", name: "11_After",    dur: 0.5 },
+  { id: "2209:19110", name: "12_Before",   dur: 0.65 },
+  { id: "2209:19150", name: "12_After",    dur: 0.5 },
+  { id: "2209:19190", name: "13_Before",   dur: 0.65 },
+  { id: "2209:19198", name: "13_After" },
+];
+
+// Clickable phone components on 06_After: each click shows the next variant.
+const PHONES = [
+  { x: 1034, y: 160, w: 395.923, h: 800, variants: ["2244:19120", "2244:19121", "2244:19122"] },
+  { x: 1454, y: 160, w: 395.923, h: 800, variants: ["2244:26180", "2244:26181"] },
+];
+
+const file = id => id.replace(":", "-");
+const stage = document.getElementById("stage");
+const bar = document.getElementById("bar");
+const hint = document.getElementById("hint");
+
+const imgs = SLIDES.map((s, i) => {
+  const img = new Image();
+  img.className = "slide";
+  img.alt = s.name;
+  img.decoding = "async";
+  img.loading = i < 4 ? "eager" : "lazy";
+  img.src = `assets/slides/${file(s.id)}.jpg`;
+  stage.appendChild(img);
+  return img;
+});
+
+PHONES.forEach(p => {
+  const el = document.createElement("div");
+  el.className = "phone";
+  Object.assign(el.style, {
+    left: `${p.x / 19.2}%`, top: `${p.y / 10.8}%`,
+    width: `${p.w / 19.2}%`, height: `${p.h / 10.8}%`,
+  });
+  const layers = p.variants.map((v, i) => {
+    const im = new Image();
+    im.src = `assets/phones/${file(v)}.png`;
+    im.alt = "";
+    if (i === 0) im.classList.add("on");
+    el.appendChild(im);
+    return im;
+  });
+  let cur = 0;
+  el.addEventListener("click", e => {
+    e.stopPropagation();
+    layers[cur].classList.remove("on");
+    cur = (cur + 1) % layers.length;
+    layers[cur].classList.add("on");
+  });
+  p.reset = () => { layers.forEach((l, i) => l.classList.toggle("on", i === 0)); cur = 0; };
+  stage.appendChild(el);
+});
+
+let index = -1, timer = null;
+
+function show(i) {
+  i = Math.max(0, Math.min(SLIDES.length - 1, i));
+  if (i === index) return;
+  clearTimeout(timer);
+  const prev = SLIDES[index];
+  // Use the outgoing slide's Figma transition duration when moving forward.
+  const dur = i > index && prev ? (prev.dur ?? 0.5) : 0.4;
+  imgs.forEach((img, k) => {
+    img.style.transitionDuration = `${dur}s`;
+    img.classList.toggle("on", k === i);
+  });
+  index = i;
+  const s = SLIDES[i];
+  stage.dataset.id = s.id;
+  if (s.id !== "2244:14408") PHONES.forEach(p => p.reset());
+  bar.style.width = `${((i + 1) / SLIDES.length) * 100}%`;
+  history.replaceState(null, "", `#${i + 1}`);
+  // Warm the next couple of slides
+  for (let k = i + 1; k <= i + 2 && k < imgs.length; k++) imgs[k].loading = "eager";
+  if (s.auto != null) timer = setTimeout(() => show(i + 1), (s.auto + dur) * 1000);
+}
+
+const next = () => show(index + 1);
+const prev = () => show(index - 1);
+
+stage.addEventListener("click", next);
+document.addEventListener("keydown", e => {
+  if (["ArrowRight", "Enter", " ", "PageDown"].includes(e.key)) { e.preventDefault(); next(); }
+  else if (["ArrowLeft", "Backspace", "PageUp"].includes(e.key)) { e.preventDefault(); prev(); }
+  else if (e.key === "Home") show(0);
+  else if (e.key === "End") show(SLIDES.length - 1);
+  else if (e.key.toLowerCase() === "f") {
+    document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.();
+  }
+});
+
+// Swipe on touch devices
+let tx = null;
+stage.addEventListener("touchstart", e => { tx = e.touches[0].clientX; }, { passive: true });
+stage.addEventListener("touchend", e => {
+  if (tx == null) return;
+  const dx = e.changedTouches[0].clientX - tx;
+  if (Math.abs(dx) > 50) { e.preventDefault(); dx < 0 ? next() : prev(); }
+  tx = null;
+});
+
+setTimeout(() => hint.classList.add("hide"), 4000);
+show((parseInt(location.hash.slice(1), 10) || 1) - 1);
+</script>
+</body>
+</html>
