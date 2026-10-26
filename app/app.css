@@ -24,18 +24,27 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 /* ---------- Side panel ---------- */
 #panel {
-  width: 280px; flex: none;
+  width: 330px; flex: none;
   background: var(--panel);
   border-right: 1px solid var(--line);
   display: flex; flex-direction: column;
   height: 100%;
+  overflow-y: auto;
 }
-#panel header { padding: 20px 20px 12px; }
+#panel header { padding: 20px 20px 14px; }
 .brand { font-size: 26px; font-weight: 700; letter-spacing: -.5px; color: var(--text); text-decoration: none; }
 .brand span { color: var(--accent); }
-.sub { margin: 2px 0 0; color: var(--muted); font-size: 12px; }
+.intro { margin: 6px 0 10px; color: var(--muted); font-size: 13px; }
+.how { margin: 0 0 14px; padding-left: 18px; font-size: 12.5px; color: var(--text); }
+.how li { margin: 2px 0; }
+.how em { font-style: normal; color: var(--muted); }
+.primary {
+  width: 100%; padding: 10px 14px; border: 0; border-radius: 12px;
+  background: var(--accent); color: #0e0f0d; font-weight: 700; font-size: 14px;
+}
+.primary:hover { filter: brightness(1.06); }
 
-.controls { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 20px 14px; border-bottom: 1px solid var(--line); }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 20px 14px; border-bottom: 1px solid var(--line); }
 .controls button {
   background: #22251f; border: 1px solid var(--line); border-radius: 999px;
   padding: 6px 12px; font-size: 13px;
@@ -44,19 +53,31 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .toggle { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); width: 100%; cursor: pointer; }
 .toggle input { accent-color: var(--accent); }
 
-#flows { flex: 1; overflow-y: auto; padding: 8px 12px 16px; }
-#flows h3 { margin: 14px 8px 6px; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-#flows button {
-  display: block; width: 100%; text-align: left;
-  background: none; border: 0; border-radius: 8px;
-  padding: 7px 10px; font-size: 13.5px; color: var(--text);
+#flows { flex: 1 0 auto; padding: 6px 12px 20px; }
+#flows h2.role {
+  margin: 18px 8px 4px; padding-top: 12px; border-top: 1px solid var(--line);
+  font-size: 15px; font-weight: 700; color: var(--accent);
 }
-#flows button:hover { background: #22251f; }
-#flows button.on { background: rgba(165, 254, 125, .12); color: var(--accent); }
+#flows h2.role:first-child { border-top: 0; padding-top: 4px; margin-top: 8px; }
+#flows h2.role small { font-weight: 400; font-size: 12px; color: var(--muted); margin-left: 4px; }
+#flows h3 { margin: 12px 8px 4px; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+#flows button.flow {
+  display: block; width: 100%; text-align: left;
+  background: none; border: 0; border-left: 2px solid transparent; border-radius: 8px;
+  padding: 7px 10px; color: var(--text);
+}
+#flows button.flow { scroll-margin: 12px 0 120px; }
+#flows button.flow .t { display: block; font-size: 13.5px; font-weight: 500; }
+#flows button.flow .d { display: block; font-size: 12px; color: var(--muted); margin-top: 1px; }
+#flows button.flow:hover { background: #22251f; }
+#flows button.flow.on { background: rgba(165, 254, 125, .1); border-left-color: var(--accent); }
+#flows button.flow.on .t { color: var(--accent); }
 
-#panel footer { border-top: 1px solid var(--line); padding: 12px 20px 16px; font-size: 12px; color: var(--muted); }
-#where { color: var(--text); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tip { margin: 4px 0 0; }
+#panel footer { position: sticky; bottom: 0; background: var(--panel); border-top: 1px solid var(--line); padding: 12px 20px 16px; font-size: 12px; color: var(--muted); }
+.here { margin: 0 0 2px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+#where .sec { display: block; font-size: 12px; }
+#where strong { display: block; color: var(--text); font-size: 14px; }
+#where .scr { display: block; font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ---------- Device ---------- */
 #stage { flex: 1; position: relative; display: grid; place-items: center; overflow: hidden; }
@@ -114,7 +135,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 @media (max-width: 760px) {
   body { display: block; }
   #panel {
-    position: fixed; z-index: 10; left: 0; top: 0; bottom: 0; width: min(300px, 85vw);
+    position: fixed; z-index: 10; left: 0; top: 0; bottom: 0; width: min(340px, 88vw);
     transform: translateX(-100%); transition: transform .25s ease;
     box-shadow: 10px 0 40px rgba(0, 0, 0, .5);
   }

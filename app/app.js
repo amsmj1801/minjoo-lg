@@ -26,20 +26,48 @@
   window.addEventListener('resize', fit);
 
   // ---------- Flow menu ----------
-  let lastGroup = null;
+  // Each screen belongs to the first flow that reaches it without passing through another flow's start.
+  const flowOf = {};
+  const starts = new Set(FLOWS.map(f => f.start));
   FLOWS.forEach(f => {
-    if (f.group !== lastGroup) {
-      const h = document.createElement('h3');
-      h.textContent = f.group;
+    const queue = [f.start];
+    while (queue.length) {
+      const id = queue.shift();
+      if (flowOf[id] || (id !== f.start && starts.has(id))) continue;
+      flowOf[id] = f;
+      const s = byId[id];
+      if (!s) continue;
+      s.hs.forEach(h => { if (h.to !== 'BACK') queue.push(h.to); });
+      if (s.fixed) queue.push(s.fixed.to);
+      if (s.auto) queue.push(s.auto[0]);
+    }
+  });
+
+  let lastRole = null, lastSection = null;
+  FLOWS.forEach(f => {
+    if (f.role !== lastRole) {
+      const h = document.createElement('h2');
+      h.className = 'role';
+      h.innerHTML = f.role === 'Club admin'
+        ? 'Club admin <small>for club organisers</small>'
+        : 'Member app <small>for students</small>';
       flowsNav.appendChild(h);
-      lastGroup = f.group;
+      lastRole = f.role;
+    }
+    if (f.section !== lastSection) {
+      const h = document.createElement('h3');
+      h.textContent = f.section;
+      flowsNav.appendChild(h);
+      lastSection = f.section;
     }
     const b = document.createElement('button');
     b.type = 'button';
-    b.textContent = f.title;
+    b.className = 'flow';
     b.dataset.start = f.start;
+    b.innerHTML = `<span class="t"></span><span class="d"></span>`;
+    b.querySelector('.t').textContent = f.title;
+    b.querySelector('.d').textContent = f.desc;
     b.addEventListener('click', () => {
-      stack = [];
       go(f.start, { reset: true });
       document.body.classList.remove('drawer');
     });
@@ -47,8 +75,18 @@
   });
 
   function markFlow(id) {
-    const buttons = [...flowsNav.querySelectorAll('button')];
-    buttons.forEach(b => b.classList.toggle('on', b.dataset.start === id));
+    const f = flowOf[id];
+    flowsNav.querySelectorAll('button.flow').forEach(b => {
+      const on = !!f && b.dataset.start === f.start;
+      if (on && !b.classList.contains('on')) b.scrollIntoView({ block: 'nearest' });
+      b.classList.toggle('on', on);
+    });
+    where.innerHTML = f
+      ? `<span class="sec"></span><strong></strong><span class="scr"></span>`
+      : `<strong></strong><span class="scr"></span>`;
+    if (f) where.querySelector('.sec').textContent = f.section;
+    where.querySelector('strong').textContent = f ? f.title : 'Club X';
+    where.querySelector('.scr').textContent = 'Screen: ' + byId[id].name;
   }
 
   // ---------- Rendering ----------
@@ -148,7 +186,7 @@
     }
     current = { s, el };
     viewport.dataset.screen = id;
-    where.textContent = s.name;
+    markFlow(id);
     document.title = `${s.name} · Club X prototype`;
     history.replaceState(null, '', '#' + id.replace(':', '-'));
 
@@ -162,7 +200,6 @@
     if (current && !opts.reset && !current.s.auto) stack.push(current.s.id);
     if (opts.reset) stack = [];
     show(id, 'fwd');
-    markFlow(id);
   }
 
   function back() {
@@ -178,6 +215,7 @@
   // ---------- Controls ----------
   document.getElementById('btn-back').addEventListener('click', back);
   document.getElementById('btn-restart').addEventListener('click', restart);
+  document.getElementById('btn-tour').addEventListener('click', () => { restart(); document.body.classList.remove('drawer'); });
   document.getElementById('menu').addEventListener('click', e => {
     e.stopPropagation();
     document.body.classList.toggle('drawer');
@@ -204,7 +242,11 @@
   fit();
   const fromHash = location.hash.slice(1).replace('-', ':');
   if (byId[fromHash]) go(fromHash, { reset: true });
-  else restart();
+  else {
+    restart();
+    // First visit on a phone: show the guide/menu first
+    if (window.matchMedia('(max-width: 760px)').matches) document.body.classList.add('drawer');
+  }
   window.clubx = { go: id => go(id, { reset: true }), back };
   window.addEventListener('hashchange', () => {
     const id = location.hash.slice(1).replace('-', ':');

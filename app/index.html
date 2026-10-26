@@ -11,17 +11,23 @@
 <aside id="panel" aria-label="Flows">
   <header>
     <a class="brand" href="../index.html">Club<span>X</span></a>
-    <p class="sub">App prototype · from Figma “Design”</p>
+    <p class="intro">An app for university clubs: members find and join events and get in with one ticket (ONE PASS). Club admins create events and check guests in at the door.</p>
+    <ol class="how">
+      <li>Pick a task below <em>or</em> start the full tour.</li>
+      <li>Tap the phone like a real app.</li>
+      <li>Not sure what to tap? Tap anywhere and the tappable spots light up in blue.</li>
+    </ol>
+    <button id="btn-tour" class="primary" type="button">▶ Start the full tour</button>
   </header>
   <div class="controls">
     <button id="btn-back" type="button" title="Back (←)">← Back</button>
     <button id="btn-restart" type="button" title="Restart (R)">Restart</button>
-    <label class="toggle"><input id="chk-hints" type="checkbox"> Show tap areas</label>
+    <label class="toggle"><input id="chk-hints" type="checkbox"> Always show tappable spots</label>
   </div>
   <nav id="flows"></nav>
   <footer>
+    <p class="here">You are here</p>
     <div id="where"></div>
-    <p class="tip">Tap anywhere that isn’t a link to flash the tap areas.</p>
   </footer>
 </aside>
 
