@@ -1,4 +1,4 @@
-# LG Display - Prototypes
+# Club X — Prototypes
 
 Interactive prototypes built from the Figma file *CLUB.LMS UI*.
 
