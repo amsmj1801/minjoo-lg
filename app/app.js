@@ -187,7 +187,7 @@
     current = { s, el };
     viewport.dataset.screen = id;
     markFlow(id);
-    document.title = `${s.name} · Club X prototype`;
+    document.title = `${s.name} · LG Prototype`;
     history.replaceState(null, '', '#' + id.replace(':', '-'));
 
     if (s.auto) timer = setTimeout(() => go(s.auto[0]), s.auto[1] * 1000);

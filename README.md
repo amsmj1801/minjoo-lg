@@ -1,4 +1,4 @@
-# Club X — Prototypes
+# LG Prototype
 
 Interactive prototypes built from the Figma file *CLUB.LMS UI*.
 
