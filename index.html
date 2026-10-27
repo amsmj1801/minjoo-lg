@@ -22,7 +22,9 @@
   main { width: min(760px, 100%); }
   h1 { font-size: 44px; letter-spacing: -1px; margin: 0; }
   h1 span { color: var(--accent); }
-  p.lead { color: var(--muted); margin: 6px 0 28px; }
+  p.lead { color: var(--muted); margin: 6px 0 14px; }
+  p.role { margin: 0 0 28px; padding: 14px 16px; background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 12px; font-size: 14px; }
+  p.role strong { color: var(--accent); }
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
   a.card { display: block; text-decoration: none; color: inherit; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px; transition: border-color .15s, transform .15s; }
   a.card:hover { border-color: var(--accent); transform: translateY(-2px); }
@@ -35,6 +37,7 @@
 <main>
   <h1>Club<span>X</span></h1>
   <p class="lead">Interactive prototypes built from the CLUB.LMS UI Figma file.</p>
+  <p class="role">I worked as the <strong>PM</strong>: I managed all of the planning, designed the basic UX/UI (the user flow), and communicated with customers. I worked with two programmers, one designer, and one co-PM.</p>
   <div class="grid">
     <a class="card" href="app/index.html">
       <h2>App prototype</h2>
